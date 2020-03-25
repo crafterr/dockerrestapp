@@ -1,0 +1,47 @@
+version: '3'
+services:
+  web:
+    image: nginx:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./code:/code
+      - ./site.conf:/etc/nginx/conf.d/site.conf
+    links:
+      - php
+      - database
+
+  php:
+    image: crafter83/php_with_pdo:php72withpdo
+    volumes:
+      - ./code:/code
+
+  # MySQL Server
+  database:
+    image: mariadb:10
+    container_name: database
+    environment:
+      MYSQL_USER: crafter
+      MYSQL_PASSWORD: fender
+      MYSQL_DATABASE: api_example
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    volumes:
+      - ./dbdata/:/var/lib/mysql/
+    ports:
+      - "3306:3306"
+    restart: always
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    links:
+      - database:db
+    ports:
+      - 9200:80
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: fender
+      MYSQL_ROOT_PASSWORD: fender
+
+volumes:
+  dbdata:
